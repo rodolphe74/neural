@@ -1,5 +1,5 @@
 # neural
 
-<img src="homer.jpg" height="200">
+<img src="homer.jpg" height="300">
 
 My mutli-layer perceptron back propagation implementation
