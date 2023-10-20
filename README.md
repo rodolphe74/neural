@@ -2,4 +2,4 @@
 
 <img src="homer.jpg" height="300">
 
-My mutli-layer perceptron back propagation implementation
+My multi-layer perceptron back propagation implementation
