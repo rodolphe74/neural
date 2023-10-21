@@ -87,6 +87,17 @@ public class Ocr {
 		}
 	}
 
+	static double[] getOutputForSymbolIndex(int index) {
+		String binaryString = Integer.toBinaryString(index);
+		String padded = String.format("%5s", binaryString).replaceAll(" ", "0");
+		double[] out = new double[padded.length()];
+		for (int i = 0; i < padded.length(); i++) {
+			char bit = padded.charAt(i);
+			out[i] = (bit == '1' ? 1 : 0);
+		}
+		return out;
+	}
+
 	public static void main(String[] args) throws IOException, URISyntaxException {
 		List<Pair<String, File>> filesList = new ArrayList<>();
 
@@ -114,17 +125,24 @@ public class Ocr {
 
 		// prepare inputs & outputs
 		double batchRatio = 0.75;
-		int symbolsSize = inputsMap.keySet().size();
+		List<double[]> batchInputs = new ArrayList<>();
+		List<double[]> batchOutputs = new ArrayList<>();
 		int i = 0;
 		for (String k : inputsMap.keySet()) {
 			// take batchratio input from dataset
 			int batchSize = (int) (inputsMap.get(k).size() * batchRatio);
-			List<double[]> inputsList = inputsMap.get(k);
-			double[][] inputs = new double[symbolsSize][batchSize];
+			List<double[]> inputsList = inputsMap.get(k);	// List of same symbol
+
+
 			for (int j = 0; j < batchSize; j++) {
-				// inputs[i][j] = inp
+				batchInputs.add(inputsList.get(j));
+				batchOutputs.add(getOutputForSymbolIndex(i));
 			}
+
 			i++;
 		}
+		System.out.println("total symbols:" + inputsMap.keySet().size());
+		System.out.println("batch input size:" + batchInputs.size());
+		System.out.println("batch output size:" + batchOutputs.size());
 	}
 }
