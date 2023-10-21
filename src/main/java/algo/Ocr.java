@@ -127,8 +127,9 @@ public class Ocr {
 		double batchRatio = 0.75;
 		List<double[]> batchInputs = new ArrayList<>();
 		List<double[]> batchOutputs = new ArrayList<>();
-		int i = 0;
+		int idx = 0;
 		for (String k : inputsMap.keySet()) {
+			System.out.println("key:" + k);
 			// take batchratio input from dataset
 			int batchSize = (int) (inputsMap.get(k).size() * batchRatio);
 			List<double[]> inputsList = inputsMap.get(k);	// List of same symbol
@@ -136,13 +137,23 @@ public class Ocr {
 
 			for (int j = 0; j < batchSize; j++) {
 				batchInputs.add(inputsList.get(j));
-				batchOutputs.add(getOutputForSymbolIndex(i));
+				batchOutputs.add(getOutputForSymbolIndex(idx));
 			}
 
-			i++;
+			idx++;
 		}
 		System.out.println("total symbols:" + inputsMap.keySet().size());
 		System.out.println("batch input size:" + batchInputs.size());
 		System.out.println("batch output size:" + batchOutputs.size());
+
+		double[][] inputs = new double[batchInputs.size()][WIDTH*HEIGHT];
+		double[][] outputs = new double[batchInputs.size()][5];
+		for (int i = 0; i < batchInputs.size(); i++) {
+			System.arraycopy(batchInputs.get(i), 0, inputs[i], 0, WIDTH*HEIGHT);
+			System.arraycopy(batchOutputs.get(i), 0, outputs[i], 0, 5);
+			// debugSymbol(batchInputs.get(i));
+		}
+
+		System.out.println("The end");
 	}
 }
