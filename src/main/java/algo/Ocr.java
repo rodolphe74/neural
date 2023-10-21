@@ -6,6 +6,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,8 +43,8 @@ public class Ocr {
 			int red = (int) pixels[i * comps] & 0xff;
 			int blue = (int) pixels[i * comps + 1] & 0xff;
 			int green = (int) pixels[i * comps + 2] & 0xff;
-//			double gray = 0.299 * red + 0.587 * green + 0.114 * blue;
-//			array[i] = 1 - gray;
+			// double gray = 0.299 * red + 0.587 * green + 0.114 * blue;
+			// array[i] = 1 - gray;
 			if (red < THRESHOLD || green < THRESHOLD || blue < THRESHOLD) {
 				array[i] = 1.0;
 			}
@@ -83,11 +87,12 @@ public class Ocr {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, URISyntaxException {
 		List<Pair<String, File>> filesList = new ArrayList<>();
-		recurseFiles(
-				"C:\\\\Users\\\\rodoc\\\\HOME\\\\developpement\\\\eclipse-workspace\\\\neural\\\\src\\\\main\\\\resources\\\\mathdataset32",
-				filesList);
+
+		URI uri = ClassLoader.getSystemResource("mathdataset32").toURI();
+		String mainPath = Paths.get(uri).toString();
+		recurseFiles(mainPath, filesList);
 
 		Map<String, List<double[]>> inputsMap = new HashMap<>();
 		for (Pair<String, File> p : filesList) {
@@ -117,7 +122,7 @@ public class Ocr {
 			List<double[]> inputsList = inputsMap.get(k);
 			double[][] inputs = new double[symbolsSize][batchSize];
 			for (int j = 0; j < batchSize; j++) {
-//				inputs[i][j] = inp
+				// inputs[i][j] = inp
 			}
 			i++;
 		}
