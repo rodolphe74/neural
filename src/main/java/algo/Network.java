@@ -26,20 +26,39 @@ public class Network implements Serializable {
 		layers.add(l);
 	}
 
+	// public void initWeights() {
+	// 	// https://machinelearningmastery.com/weight-initialization-for-deep-learning-neural-networks/
+	// 	// int sz = getLayers().get(0).getNeurons().size();
+	// 	// double lower = -(1.0 / Math.sqrt(sz));
+	// 	// double upper = (1.0 / Math.sqrt(sz));
+	// 	for (Layer l : layers) {
+	// 		for (Neuron n : l.getNeurons()) {
+	// 			for (Synapse s : n.getOutputList()) {
+	// 				double r = Math.random();
+	// 				// double scaled = lower + r * (upper - lower);
+	// 				// Log.debug("synapse from " + n.getName() + "=" + scaled);
+	// 				// s.setWeight(scaled);
+	// 				Log.debug("synapse from " + n.getName() + "=" + r);
+	// 				s.setWeight(r);
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 	public void initWeights() {
 		// https://machinelearningmastery.com/weight-initialization-for-deep-learning-neural-networks/
-		// int sz = getLayers().get(0).getNeurons().size();
-		// double lower = -(1.0 / Math.sqrt(sz));
-		// double upper = (1.0 / Math.sqrt(sz));
+		int sz = getLayers().get(0).getNeurons().size();
+		double lower = -(1.0 / Math.sqrt(sz));
+		double upper = (1.0 / Math.sqrt(sz));
 		for (Layer l : layers) {
 			for (Neuron n : l.getNeurons()) {
 				for (Synapse s : n.getOutputList()) {
 					double r = Math.random();
-					// double scaled = lower + r * (upper - lower);
-					// Log.debug("synapse from " + n.getName() + "=" + scaled);
-					// s.setWeight(scaled);
-					Log.debug("synapse from " + n.getName() + "=" + r);
-					s.setWeight(r);
+					double scaled = lower + r * (upper - lower);
+					Log.debug("synapse from " + n.getName() + "=" + scaled);
+					s.setWeight(scaled);
+					// Log.debug("synapse from " + n.getName() + "=" + r);
+					// s.setWeight(r);
 				}
 			}
 		}
@@ -208,11 +227,24 @@ public class Network implements Serializable {
 				for (int k = 0; k < exprectedOutputs[j].length; k++)
 					getLayers().get(getLayers().size() - 1).getNeurons().get(k).setExpected(exprectedOutputs[j][k]);
 
+				//DEBUG
+				// Ocr.debugSymbol(inputs[j]);
+				// System.out.print("current out:");
+				// for (int k = 0; k < exprectedOutputs[j].length; k++) {
+				// 	System.out.print(exprectedOutputs[j][k] + " ");
+				// 	// if (exprectedOutputs[j][k] > 0) {
+				// 	// 	int q = 1;
+				// 	// }
+				// }
+				// System.out.println();
+				///////
+
 				// backpropagation
 				forward(); // update neurons output
 				totalError = totalError();
 				String formatedError = String.format("%.10f", totalError);
-				Log.debug("Total error=" + formatedError);
+				Log.info( "Epoch " + i + "  Input set " + j + "  Total error=" + formatedError);
+				// System.out.println("Total error=" + formatedError);
 				if (totalError < tresholdError) {
 					Log.debug("Threshold stop at epoch " + i);
 					return i;

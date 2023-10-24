@@ -14,6 +14,7 @@ public class SynapseFinder implements Serializable {
 	private static Map<String, Synapse> synapseCache = new HashMap<String, Synapse>();
     private static String keySeparator = ">";
     private static SynapseFinder singleton;
+    private static Map<Neuron, List<Synapse>> neuronInputsCache = new HashMap<>();
     
     public static SynapseFinder getInstance() {
     	if (singleton == null) {
@@ -40,6 +41,13 @@ public class SynapseFinder implements Serializable {
     }
 
     public List<Synapse> getSynapsesThatEndAt(Neuron n) {
+        // check cache
+        List<Synapse> slc = neuronInputsCache.get(n);
+        if (slc != null)  {
+            return slc;
+        }
+
+        // not in cache
         List<Synapse> sl = new ArrayList<Synapse>();
         String neuronEndKey = String.valueOf(System.identityHashCode(n));
         for (String key : synapseCache.keySet()) {
@@ -48,6 +56,7 @@ public class SynapseFinder implements Serializable {
                 sl.add(synapseCache.get(key));
             }
         }
+        neuronInputsCache.put(n, sl);
         return sl;
     }
     
@@ -57,6 +66,7 @@ public class SynapseFinder implements Serializable {
 
     public void clearCache() {
         synapseCache.clear();
+        neuronInputsCache.clear();
     }
     
     public void commitWeights() {

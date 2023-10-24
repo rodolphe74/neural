@@ -36,8 +36,10 @@ public class Xor {
 
         // train
         network.setLearningRate(0.1);
+        long st = System.currentTimeMillis();
         int epochs = network.train(20000, 0.000000005);
-        Log.info("epochs:" + epochs);
+        long et = System.currentTimeMillis();
+        Log.info("epochs:" + epochs + " in " + (et - st));
 
         // draw network
         try {

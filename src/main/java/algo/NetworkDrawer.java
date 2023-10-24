@@ -53,6 +53,7 @@ public class NetworkDrawer {
 
         for (Layer l : network.getLayers()) {
             for (Neuron n : l.getNeurons()) {
+                System.out.println("Drawing neuron " + n.getName());
                 vg2d.draw(new Ellipse2D.Double(currentLayerColumn, currentLayerRow, NEURON_RADIUS * 2,
                         NEURON_RADIUS * 2));
                 neuronsCoordinates.put(n, new Pair<Float, Float>(currentLayerColumn, currentLayerRow));
@@ -71,6 +72,8 @@ public class NetworkDrawer {
         for (Layer l : network.getLayers()) {
             for (Neuron n : l.getNeurons()) {
                 for (Synapse s : n.getOutputList()) {
+
+                    System.out.println("Connecting neuron " + n.getName());
 
                     Pair<Float, Float> coordsLeft = neuronsCoordinates.get(n);
                     Pair<Float, Float> coordsRight = neuronsCoordinates.get(s.getRightNeuron());

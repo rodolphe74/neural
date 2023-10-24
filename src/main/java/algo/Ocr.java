@@ -6,10 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +16,8 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.javatuples.Pair;
+
+import com.esotericsoftware.minlog.Log;
 
 public class Ocr {
 
@@ -99,11 +98,17 @@ public class Ocr {
 	}
 
 	public static void main(String[] args) throws IOException, URISyntaxException {
+		// Log.set(Log.LEVEL_DEBUG);
+		Log.set(Log.LEVEL_INFO);
+
 		List<Pair<String, File>> filesList = new ArrayList<>();
 
-		URI uri = ClassLoader.getSystemResource("mathdataset32").toURI();
-		String mainPath = Paths.get(uri).toString();
-		recurseFiles(mainPath, filesList);
+		// URI uri = ClassLoader.getSystemResource("mathdataset32").toURI();
+		// String mainPath = Paths.get(uri).toString();
+		// recurseFiles(mainPath, filesList);
+
+		recurseFiles("C:\\Users\\rodoc\\HOME\\developpement\\java\\n" + //
+				"eural\\target\\classes\\mathdataset32", filesList);
 
 		Map<String, List<double[]>> inputsMap = new HashMap<>();
 		for (Pair<String, File> p : filesList) {
@@ -132,8 +137,7 @@ public class Ocr {
 			System.out.println("key:" + k);
 			// take batchratio input from dataset
 			int batchSize = (int) (inputsMap.get(k).size() * batchRatio);
-			List<double[]> inputsList = inputsMap.get(k);	// List of same symbol
-
+			List<double[]> inputsList = inputsMap.get(k); // List of same symbol
 
 			for (int j = 0; j < batchSize; j++) {
 				batchInputs.add(inputsList.get(j));
@@ -146,14 +150,54 @@ public class Ocr {
 		System.out.println("batch input size:" + batchInputs.size());
 		System.out.println("batch output size:" + batchOutputs.size());
 
-		double[][] inputs = new double[batchInputs.size()][WIDTH*HEIGHT];
+		double[][] inputs = new double[batchInputs.size()][WIDTH * HEIGHT];
 		double[][] outputs = new double[batchInputs.size()][5];
 		for (int i = 0; i < batchInputs.size(); i++) {
-			System.arraycopy(batchInputs.get(i), 0, inputs[i], 0, WIDTH*HEIGHT);
+			System.arraycopy(batchInputs.get(i), 0, inputs[i], 0, WIDTH * HEIGHT);
 			System.arraycopy(batchOutputs.get(i), 0, outputs[i], 0, 5);
 			// debugSymbol(batchInputs.get(i));
 		}
 
-		System.out.println("The end");
+		System.out.println("Symbols loaded");
+
+		// Defining an OCR network
+		Network network = new Network();
+
+		// Layers
+		Layer l0 = Network.createLayer(network, 1024, 0.0f);
+		Layer l1 = Network.createLayer(network, 64, 0.0f);
+		Layer l2 = Network.createLayer(network, 5, 0.0f);
+
+		// Layers connection
+		Network.connectLayers(network, l0, l1);
+		Network.connectLayers(network, l1, l2);
+
+		// Add layers on network
+		network.addLayer(l0);
+		network.addLayer(l1);
+		network.addLayer(l2);
+
+		// Random weights
+		network.initWeights();
+
+		System.out.println("Network defined");
+
+		// draw network
+        // try {
+        //     NetworkDrawer.draw(network, "ocr.pdf");
+        // } catch (IOException e) {
+        //     Log.error("Can't write network pdf", e);
+        // }
+
+		// System.out.println("Network drawed");
+
+		// Define sets
+		network.setInputs(inputs);
+		network.setExpectedOutputs(outputs);
+
+		// train
+        network.setLearningRate(0.5);
+        int epochs = network.train(2000, 0.000000005);
+        Log.info("epochs:" + epochs);
 	}
 }
