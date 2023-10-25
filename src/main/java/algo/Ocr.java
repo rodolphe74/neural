@@ -25,6 +25,7 @@ public class Ocr {
 	final static int HEIGHT = 32;
 	final static int SYMBOL_SIZE = WIDTH * HEIGHT;
 	final static double THRESHOLD = 128;
+	static String[] matchSymbol;
 
 	static double[] readSymbol(String filename) throws IOException {
 		double[] array = new double[SYMBOL_SIZE];
@@ -97,6 +98,17 @@ public class Ocr {
 		return out;
 	}
 
+	static String convertOutputToSymbol(double[] output) {
+		String binaryString = "";
+		// for (int i = output.length - 1; i >= 0; i--) {
+		for (int i = 0; i < output.length; i++) {
+			int v = (int) Math.round(output[i]);
+			binaryString += String.valueOf(v);
+		}
+		int index = Integer.parseInt(binaryString, 2);
+		return matchSymbol[index];
+	}
+
 	public static void main(String[] args) throws IOException, URISyntaxException {
 		// Log.set(Log.LEVEL_DEBUG);
 		Log.set(Log.LEVEL_INFO);
@@ -107,8 +119,8 @@ public class Ocr {
 		// String mainPath = Paths.get(uri).toString();
 		// recurseFiles(mainPath, filesList);
 
-		recurseFiles("C:\\Users\\rodoc\\HOME\\developpement\\java\\n" + //
-				"eural\\target\\classes\\mathdataset32", filesList);
+		recurseFiles("C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/mathdataset32",
+				filesList);
 
 		Map<String, List<double[]>> inputsMap = new HashMap<>();
 		for (Pair<String, File> p : filesList) {
@@ -133,6 +145,7 @@ public class Ocr {
 		List<double[]> batchInputs = new ArrayList<>();
 		List<double[]> batchOutputs = new ArrayList<>();
 		int idx = 0;
+		matchSymbol = new String[inputsMap.keySet().size()];
 		for (String k : inputsMap.keySet()) {
 			System.out.println("key:" + k);
 			// take batchratio input from dataset
@@ -143,7 +156,7 @@ public class Ocr {
 				batchInputs.add(inputsList.get(j));
 				batchOutputs.add(getOutputForSymbolIndex(idx));
 			}
-
+			matchSymbol[idx] = k;
 			idx++;
 		}
 		System.out.println("total symbols:" + inputsMap.keySet().size());
@@ -178,16 +191,16 @@ public class Ocr {
 		network.addLayer(l2);
 
 		// Random weights
-		network.initWeights();
+		network.xavierInitWeights();
 
 		System.out.println("Network defined");
 
 		// draw network
-        // try {
-        //     NetworkDrawer.draw(network, "ocr.pdf");
-        // } catch (IOException e) {
-        //     Log.error("Can't write network pdf", e);
-        // }
+		// try {
+		// NetworkDrawer.draw(network, "ocr.pdf");
+		// } catch (IOException e) {
+		// Log.error("Can't write network pdf", e);
+		// }
 
 		// System.out.println("Network drawed");
 
@@ -196,8 +209,31 @@ public class Ocr {
 		network.setExpectedOutputs(outputs);
 
 		// train
-        network.setLearningRate(0.5);
-        int epochs = network.train(2000, 0.000000005);
-        Log.info("epochs:" + epochs);
+		network.setLearningRate(0.5);
+		int epochs = network.train(100, 0.000000005);
+		Log.info("trained until epochs " + epochs);
+
+		// tests
+		Network trainedNetwork = Network.copy(network, true);
+		Log.info("error:" + String.format("%.10f", network.getTotalError()));
+
+		network = trainedNetwork;
+		double[] symbol = readSymbol(
+				"C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/mathdataset32/7/96Ub43AP.png");
+		debugSymbol(symbol);
+		double result[] = Network.predict(network, symbol);
+		Network.displayResult(symbol, result);
+		String s = convertOutputToSymbol(result);
+		Log.info("Symbol->" + s);
+
+		network = trainedNetwork;
+		Log.info("error:" + String.format("%.10f", network.getTotalError()));
+		symbol = readSymbol(
+				"C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/mathdataset32/9/5d0syBCh.png");
+		debugSymbol(symbol);
+		result = Network.predict(network, symbol);
+		Network.displayResult(symbol, result);
+		s = convertOutputToSymbol(result);
+		Log.info("Symbol->" + s);
 	}
 }

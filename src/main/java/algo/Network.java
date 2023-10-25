@@ -26,25 +26,6 @@ public class Network implements Serializable {
 		layers.add(l);
 	}
 
-	// public void initWeights() {
-	// 	// https://machinelearningmastery.com/weight-initialization-for-deep-learning-neural-networks/
-	// 	// int sz = getLayers().get(0).getNeurons().size();
-	// 	// double lower = -(1.0 / Math.sqrt(sz));
-	// 	// double upper = (1.0 / Math.sqrt(sz));
-	// 	for (Layer l : layers) {
-	// 		for (Neuron n : l.getNeurons()) {
-	// 			for (Synapse s : n.getOutputList()) {
-	// 				double r = Math.random();
-	// 				// double scaled = lower + r * (upper - lower);
-	// 				// Log.debug("synapse from " + n.getName() + "=" + scaled);
-	// 				// s.setWeight(scaled);
-	// 				Log.debug("synapse from " + n.getName() + "=" + r);
-	// 				s.setWeight(r);
-	// 			}
-	// 		}
-	// 	}
-	// }
-
 	public void initWeights() {
 		// https://machinelearningmastery.com/weight-initialization-for-deep-learning-neural-networks/
 		int sz = getLayers().get(0).getNeurons().size();
@@ -59,6 +40,23 @@ public class Network implements Serializable {
 					s.setWeight(scaled);
 					// Log.debug("synapse from " + n.getName() + "=" + r);
 					// s.setWeight(r);
+				}
+			}
+		}
+	}
+
+	public void xavierInitWeights() {
+		for (Layer l : layers) {
+			for (Neuron n : l.getNeurons()) {
+				for (Synapse s : n.getOutputList()) {
+					double r = Math.random();
+					int fanIn = n.getInputList().size();
+					int fanOut = n.getOutputList().size();
+					double lower = -(Math.sqrt(6) / Math.sqrt(fanIn + fanOut));
+					double upper = (Math.sqrt(6) / Math.sqrt(fanIn + fanOut));
+					double scaled = lower + r * (upper - lower);
+					Log.debug("synapse weight from " + n.getName() + "=" + scaled);
+					s.setWeight(scaled);
 				}
 			}
 		}
@@ -108,10 +106,12 @@ public class Network implements Serializable {
 
 			// update outputs
 			for (Pair<Neuron, Double> p : neuronsToUpdate) {
-				Log.debug("Updating " + p.getValue0().getName() + " current output=" + p.getValue0().getOutput());
+				Log.debug("Updating " + p.getValue0().getName() + " current output=" +
+						p.getValue0().getOutput());
 				p.getValue0().setOutput(Calculus.sigmoid(p.getValue1()));
-				Log.debug("  to " + p.getValue0().getOutput());
+				Log.debug(" to " + p.getValue0().getOutput());
 			}
+			/////////////
 		}
 	}
 
@@ -136,15 +136,16 @@ public class Network implements Serializable {
 		Network networkCopy = SerializationUtils.clone(network);
 
 		if (clearSynapsesCache == true)
-			SynapseFinder.getInstance().clearCache();;
+			SynapseFinder.getInstance().clearCache();
+		;
 
 		for (Layer l : networkCopy.getLayers()) {
-        	for (Neuron n : l.getNeurons()) {
-        		for (Synapse s : n.getOutputList()) {
-        			SynapseFinder.getInstance().addNeuron(s, n, s.getRightNeuron());
-        		}
-        	}
-        }
+			for (Neuron n : l.getNeurons()) {
+				for (Synapse s : n.getOutputList()) {
+					SynapseFinder.getInstance().addNeuron(s, n, s.getRightNeuron());
+				}
+			}
+		}
 
 		return networkCopy;
 	}
@@ -212,14 +213,15 @@ public class Network implements Serializable {
 		for (int i = 1; i < layers.size() - 1; i++) {
 			backwardLayers(i);
 		}
-		// Commit weights 
+		// Commit weights
 		// TODO only current network weights
 		SynapseFinder.getInstance().commitWeights();
 	}
 
 	public int train(int epochs, double tresholdError) {
+		int counter = 0;
+		int modCounter = 100;
 		for (int i = 0; i < epochs; i++) {
-
 			// set input and expected output
 			for (int j = 0; j < inputs.length; j++) {
 				for (int k = 0; k < inputs[j].length; k++)
@@ -227,24 +229,13 @@ public class Network implements Serializable {
 				for (int k = 0; k < exprectedOutputs[j].length; k++)
 					getLayers().get(getLayers().size() - 1).getNeurons().get(k).setExpected(exprectedOutputs[j][k]);
 
-				//DEBUG
-				// Ocr.debugSymbol(inputs[j]);
-				// System.out.print("current out:");
-				// for (int k = 0; k < exprectedOutputs[j].length; k++) {
-				// 	System.out.print(exprectedOutputs[j][k] + " ");
-				// 	// if (exprectedOutputs[j][k] > 0) {
-				// 	// 	int q = 1;
-				// 	// }
-				// }
-				// System.out.println();
-				///////
-
 				// backpropagation
 				forward(); // update neurons output
 				totalError = totalError();
 				String formatedError = String.format("%.10f", totalError);
-				Log.info( "Epoch " + i + "  Input set " + j + "  Total error=" + formatedError);
-				// System.out.println("Total error=" + formatedError);
+				if (counter % modCounter == 0)
+					Log.info("Epoch " + i + "  Input set " + j + "  Total error=" + formatedError);
+				counter++;
 				if (totalError < tresholdError) {
 					Log.debug("Threshold stop at epoch " + i);
 					return i;
@@ -256,9 +247,9 @@ public class Network implements Serializable {
 	}
 
 	static void displayResult(double[] inputs, double[] outputs) {
-		for (int i = 0; i < inputs.length; i++) {
-			System.out.print("[" + inputs[i] + "]");
-		}
+		// for (int i = 0; i < inputs.length; i++) {
+		// System.out.print("[" + inputs[i] + "]");
+		// }
 		System.out.print(" -> ");
 		for (int i = 0; i < outputs.length; i++) {
 			System.out.print("[" + outputs[i] + "]");

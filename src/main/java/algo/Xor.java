@@ -26,7 +26,7 @@ public class Xor {
         network.addLayer(l2);
 
         // Random weights
-        network.initWeights();
+        network.xavierInitWeights();
 
         // Define sets
         double[][] inputs = { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } };
