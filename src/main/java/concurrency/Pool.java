@@ -3,6 +3,7 @@ package concurrency;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class Pool {
 
@@ -11,11 +12,11 @@ public class Pool {
     private Monitor monitor;
 
     public Pool() {
-        monitor = Monitor.getInstance();
+        monitor = new Monitor();
     }
 
     public Pool(int concurrency) {
-        monitor = Monitor.getInstance();
+        monitor = new Monitor();
         monitor.setMaxConcurrency(concurrency < MAX_CONCURRENCY ? concurrency : MAX_CONCURRENCY);
     }
 
@@ -28,18 +29,36 @@ public class Pool {
     }
 
     public void doTasks() {
-        Monitor monitor = Monitor.getInstance();
-
         Iterator<Task> i = tasks.iterator();
+        CountDownLatch countDownLatch = new CountDownLatch(tasks.size());
+        monitor.setCountDownLatch(countDownLatch);
+        System.out.println(monitor.getCountDownLatch().getCount());
         while (i.hasNext()) {
             Runnable r = i.next();
             Thread t = new Thread(r);
-            t.start();
             i.remove();
+            t.start();
             synchronized (monitor) {
                 monitor.w();
             }
             // System.out.println("Tasks done");
         }
+
+        System.out.println("-->" + monitor.getCountDownLatch().getCount());
+        try {
+            monitor.getCountDownLatch().await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+         System.out.println("==>" + monitor.getCountDownLatch().getCount());
+    }
+
+    public Monitor getMonitor() {
+        return monitor;
+    }
+
+    public void setMonitor(Monitor monitor) {
+        this.monitor = monitor;
     }
 }

@@ -5,52 +5,69 @@ import java.io.IOException;
 import com.esotericsoftware.minlog.Log;
 
 public class Xor {
+
+    // Define sets
+    static double[][] inputs = { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } };
+    static double[][] outputs = { { 0 }, { 1 }, { 1 }, { 0 } };
+
     public static void main(String[] args) {
         Log.set(Log.LEVEL_INFO);
 
-        // Defining a XOR network
-        Network network = new Network();
+        Network network = null;
 
-        // Layers
-        Layer l0 = Network.createLayer(network, 2, 0.0f);
-        Layer l1 = Network.createLayer(network, 3, 0.0f);
-        Layer l2 = Network.createLayer(network, 1, 0.0f);
+        // check if network was done before
+        network = Network.readOnDisk("xor.neu");
 
-        // Layers connection
-        Network.connectLayers(network, l0, l1);
-        Network.connectLayers(network, l1, l2);
+        if (network == null) {
+            // Defining a XOR network
+            network = new Network();
 
-        // Add layers on network
-        network.addLayer(l0);
-        network.addLayer(l1);
-        network.addLayer(l2);
+            // Layers
+            Layer l0 = Network.createLayer(network, 2, 0.0f);
+            Layer l1 = Network.createLayer(network, 3, 0.0f);
+            Layer l2 = Network.createLayer(network, 1, 0.0f);
 
-        // Random weights
-        network.xavierInitWeights();
+            // Layers connection
+            Network.connectLayers(network, l0, l1);
+            Network.connectLayers(network, l1, l2);
 
-        // Define sets
-        double[][] inputs = { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } };
-        double[][] outputs = { { 0 }, { 1 }, { 1 }, { 0 } };
-        network.setInputs(inputs);
-        network.setExpectedOutputs(outputs);
+            // Add layers on network
+            network.addLayer(l0);
+            network.addLayer(l1);
+            network.addLayer(l2);
 
-        // train
-        network.setLearningRate(0.1);
-        long st = System.currentTimeMillis();
-        int epochs = network.train(20000, 0.000000005);
-        long et = System.currentTimeMillis();
-        Log.info("epochs:" + epochs + " in " + (et - st));
+            // Random weights
+            network.xavierInitWeights();
+
+            // Define sets
+            network.setInputs(inputs);
+            network.setExpectedOutputs(outputs);
+
+            // train
+            network.setLearningRate(0.1);
+            long st = System.currentTimeMillis();
+            int epochs = network.train(20000, 0.000000005);
+            long et = System.currentTimeMillis();
+            Log.info("epochs:" + epochs + " in " + (et - st));
+
+            try {
+                network.writeOnDisk("xor.neu");
+            } catch (IOException e) {
+                Log.error("Can't serialize network", e);
+            }
+        }
 
         // draw network
-        try {
-            NetworkDrawer.draw(network, "xor.pdf");
-        } catch (IOException e) {
-            Log.error("Can't write network pdf", e);
-        }
+        // TODO optimizations
+        // try {
+        //     NetworkDrawer.draw(network, "xor.pdf");
+        // } catch (IOException e) {
+        //     Log.error("Can't write network pdf", e);
+        // }
 
         // tests
         Network trainedNetwork = Network.copy(network, true);
-        Log.info("error:" +  String.format("%.10f", network.getTotalError()));
+        Log.info("error:" + String.format("%.10f", network.getTotalError()));
 
         network = trainedNetwork;
         double[] inputTest = inputs[0];

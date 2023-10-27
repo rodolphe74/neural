@@ -11,6 +11,9 @@ import junit.framework.TestSuite;
  */
 public class ConcurrencyTest
         extends TestCase {
+
+    Integer sum = 0;
+
     /**
      * Create the test case
      *
@@ -33,32 +36,42 @@ public class ConcurrencyTest
     public void testConcurrency() {
         Log.set(Log.LEVEL_INFO);
         long t1 = System.currentTimeMillis();
+        int iterativeSum = 0;
         for (int i = 0; i < 200; i++) {
+            iterativeSum += i;
             try {
-                Thread.sleep(10);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
             }
         }
         long t2 = System.currentTimeMillis();
         Log.info("Iterative time:" + (t2 - t1));
+        Log.info("Iterative sum:" + iterativeSum);
 
-        Pool pool = new Pool(8);
-        t1 = System.currentTimeMillis();
-        Task t = new Task() {
-            @Override
-            public void whatToDo() {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                }
+        Pool pool = new Pool(16);
+        for (int k = 0; k < 5; k++) {
+            t1 = System.currentTimeMillis();
+            sum = 0;
+            for (int i = 0; i < 200; i++) {
+                Task t = new Task(pool, i) {
+                    @Override
+                    public void whatToDo(Object parameter) {
+                        try {
+                            synchronized (ConcurrencyTest.this) {
+                                ConcurrencyTest.this.sum += (int) parameter;
+                            }
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                };
+                pool.addTask(t);
             }
-        };
-        for (int i = 0; i < 200; i++) {
-            pool.addTask(t);
+            pool.doTasks();
+            t2 = System.currentTimeMillis();
+            Log.info("Concurrency time:" + (t2 - t1));
+            Log.info("Concurrency sum:" + sum);
+            assertTrue(sum == 19900);
         }
-        pool.doTasks();
-        t2 = System.currentTimeMillis();
-        Log.info("Concurrency time:" + (t2 - t1));
     }
-
 }

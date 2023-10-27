@@ -1,5 +1,11 @@
 package algo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +32,29 @@ public class Network implements Serializable {
 		layers.add(l);
 	}
 
+	public void writeOnDisk(String filename) throws IOException {
+		FileOutputStream fos = new FileOutputStream(filename);
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		oos.writeObject(this);
+		oos.close();
+	}
+
+	static public Network readOnDisk(String filename) {
+		File f = new File(filename);
+		if (!f.exists()) {
+			return null;
+		}
+		try {
+			FileInputStream fis = new FileInputStream(filename);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			Network network = (Network) ois.readObject();
+			ois.close();
+			return network;
+		} catch (IOException | ClassNotFoundException e) {
+			return null;
+		}
+	}
+
 	public void initWeights() {
 		// https://machinelearningmastery.com/weight-initialization-for-deep-learning-neural-networks/
 		int sz = getLayers().get(0).getNeurons().size();
@@ -46,6 +75,7 @@ public class Network implements Serializable {
 	}
 
 	public void xavierInitWeights() {
+		// https://ai.plainenglish.io/weight-initialization-in-neural-network-9b3935192f6
 		for (Layer l : layers) {
 			for (Neuron n : l.getNeurons()) {
 				for (Synapse s : n.getOutputList()) {
@@ -209,19 +239,24 @@ public class Network implements Serializable {
 	}
 
 	public void backward() {
+		// long t1 = System.currentTimeMillis();
 		backwardOutputLayer();
 		for (int i = 1; i < layers.size() - 1; i++) {
 			backwardLayers(i);
 		}
+		// long t2 = System.currentTimeMillis();
+		// System.out.println("#### Backward time:" + (t2 - t1) + " ####");
 		// Commit weights
 		// TODO only current network weights
 		SynapseFinder.getInstance().commitWeights();
 	}
 
 	public int train(int epochs, double tresholdError) {
-		int counter = 0;
-		int modCounter = 100;
+		// int counter = 0;
+		// int modCounter = 500;
+		double meanEpochError = 0;
 		for (int i = 0; i < epochs; i++) {
+			meanEpochError = 0;
 			// set input and expected output
 			for (int j = 0; j < inputs.length; j++) {
 				for (int k = 0; k < inputs[j].length; k++)
@@ -232,16 +267,22 @@ public class Network implements Serializable {
 				// backpropagation
 				forward(); // update neurons output
 				totalError = totalError();
-				String formatedError = String.format("%.10f", totalError);
-				if (counter % modCounter == 0)
-					Log.info("Epoch " + i + "  Input set " + j + "  Total error=" + formatedError);
-				counter++;
-				if (totalError < tresholdError) {
-					Log.debug("Threshold stop at epoch " + i);
-					return i;
-				}
+				// String formatedError = String.format("%.10f", totalError);
+				// if (counter % modCounter == 0)
+				// Log.info("Epoch " + i + " Input set " + j + " Total error=" + formatedError);
+				// counter++;
+				// if (totalError < tresholdError) {
+				// Log.debug("Threshold stop at epoch " + i);
+				// return i;
+				// }
 				backward(); // update synapse weights regarding error
+
+				meanEpochError += totalError;
+
 			}
+			meanEpochError /= inputs.length;
+			String formatedError = String.format("%.10f", meanEpochError);
+			Log.info("Mean epoch error " + i + " -> " + formatedError);
 		}
 		return epochs;
 	}
@@ -252,7 +293,8 @@ public class Network implements Serializable {
 		// }
 		System.out.print(" -> ");
 		for (int i = 0; i < outputs.length; i++) {
-			System.out.print("[" + outputs[i] + "]");
+			String formatedError = String.format("%.3f", outputs[i]);
+			System.out.print("[" + formatedError + "]");
 		}
 		System.out.println();
 	}

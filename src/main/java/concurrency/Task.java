@@ -2,16 +2,29 @@ package concurrency;
 
 public abstract class Task implements Runnable {
 
-    public abstract void whatToDo();
+    Object parameter;
+    Pool pool;
+
+    public Task(Pool pool, Object parameter) {
+        this.parameter = parameter;
+        this.pool = pool;
+    }
+
+    public abstract void whatToDo(Object parameter);
 
     @Override
     public void run() {
-        Monitor monitor = Monitor.getInstance();
-        this.whatToDo();
-        // System.out.println("Avant notify");
-        synchronized(monitor) {
-            monitor.n();
+        this.whatToDo(parameter);
+        synchronized (pool.getMonitor()) {
+            pool.getMonitor().n(this);
         }
-        // System.out.println("Apres notify");
+    }
+
+    public Object getParameter() {
+        return parameter;
+    }
+
+    public void setParameter(Object parameter) {
+        this.parameter = parameter;
     }
 }
