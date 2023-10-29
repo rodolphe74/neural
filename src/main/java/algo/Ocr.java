@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,7 +138,7 @@ public class Ocr {
 				maxIndex = i;
 			}
 		}
-		
+
 		return maxIndex;
 	}
 
@@ -147,17 +148,16 @@ public class Ocr {
 		Network network = null;
 
 		// check if network was done before
-		network = Network.readOnDisk("ocr.neu");
+		network = Network.readFromDisk("ocr.neu");
+
+		// where the data set is
+		URL url = Ocr.class.getClassLoader().getResource("digits");
+		String mainPath = Paths.get(url.toURI()).toString();
 
 		if (network == null) {
 			List<Pair<String, File>> filesList = new ArrayList<>();
 
-			// URI uri = ClassLoader.getSystemResource("mathdataset32").toURI();
-			// String mainPath = Paths.get(uri).toString();
-			// recurseFiles(mainPath, filesList);
-
-			recurseFiles("C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/digits",
-					filesList);
+			recurseFiles(mainPath, filesList);
 
 			Map<String, List<double[]>> inputsMap = new HashMap<>();
 			for (Pair<String, File> p : filesList) {
@@ -194,6 +194,7 @@ public class Ocr {
 					// debugSymbol(inputsList.get(j));
 					batchOutputs.add(getOutputForSymbolIndex(idx));
 				}
+		
 				matchSymbol[idx] = k;
 				idx++;
 			}
@@ -248,7 +249,7 @@ public class Ocr {
 
 			// train
 			network.setLearningRate(0.3);
-			int epochs = network.train(1000, 0.000000005);
+			int epochs = network.train(1000, -1);
 			Log.info("trained until epochs " + epochs);
 
 			network.writeOnDisk("ocr.neu");
@@ -259,27 +260,31 @@ public class Ocr {
 		Log.info("error:" + String.format("%.10f", network.getTotalError()));
 
 		network = trainedNetwork;
-		double[] symbol = readSymbol(
-				"C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/digits/7/41840.png");
+		double[] symbol = readSymbol(mainPath + "/7/41840.png");
 		debugSymbol(symbol);
 		double result[] = Network.predict(network, symbol);
-		Network.displayResult(symbol, result);
+		Network.displayResult(null, result);
 		Log.info("Max output neuron index:" + getMaxStimulatedNeuron(result) + "\n");
 
 		network = trainedNetwork;
-		symbol = readSymbol(
-				"C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/digits/9/42367.png");
+		symbol = readSymbol(mainPath + "/9/42367.png");
 		debugSymbol(symbol);
 		result = Network.predict(network, symbol);
-		Network.displayResult(symbol, result);
+		Network.displayResult(null, result);
 		Log.info("Max output neuron index:" + getMaxStimulatedNeuron(result) + "\n");
 
 		network = trainedNetwork;
-		symbol = readSymbol(
-				"C:/Users/rodoc/HOME/developpement/eclipse-workspace/neural/target/classes/digits/2/52888.png");
+		symbol = readSymbol(mainPath + "/2/52888.png");
 		debugSymbol(symbol);
 		result = Network.predict(network, symbol);
-		Network.displayResult(symbol, result);
+		Network.displayResult(null, result);
+		Log.info("Max output neuron index:" + getMaxStimulatedNeuron(result) + "\n");
+		
+		network = trainedNetwork;
+		symbol = readSymbol(mainPath + "/6/43136.png");
+		debugSymbol(symbol);
+		result = Network.predict(network, symbol);
+		Network.displayResult(null, result);
 		Log.info("Max output neuron index:" + getMaxStimulatedNeuron(result) + "\n");
 	}
 }

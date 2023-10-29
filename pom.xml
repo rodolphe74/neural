@@ -11,15 +11,17 @@
 	<packaging>jar</packaging>
 	<url>https://mysite.com</url>
 
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<exec.mainClass>algo.Ocr</exec.mainClass>
+		<exec.mainClass>algo.OcrMnist</exec.mainClass>
 	</properties>
 
 	<organization>
 		<name>My Organization</name>
 		<url>https://myorganization.com</url>
 	</organization>
+
 
 	<licenses>
 		<license>
@@ -38,6 +40,16 @@
 
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+		</testResources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -86,9 +98,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>de.erichseifert.vectorgraphics2d</groupId>
-			<artifactId>VectorGraphics2D</artifactId>
-			<version>0.13</version>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreesvg</artifactId>
+			<version>3.4.3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

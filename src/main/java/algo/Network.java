@@ -1,11 +1,7 @@
 package algo;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +11,22 @@ import org.javatuples.Pair;
 
 import com.esotericsoftware.minlog.Log;
 
+import serialize.Serializer;
+
 public class Network implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private List<Layer> layers;
 	private double learningRate = 0.1;
 	private double totalError;
+	
+	// serialize with datasets...
 	private double[][] inputs;
-	private double[][] exprectedOutputs;
+	private double[][] expectedOutputs;
+
+	// ...or not
+//	private transient double[][] inputs;
+//	private transient double[][] exprectedOutputs;
+
 	private static int currentNeuron = 0;
 
 	public Network() {
@@ -33,26 +38,33 @@ public class Network implements Serializable {
 	}
 
 	public void writeOnDisk(String filename) throws IOException {
-		FileOutputStream fos = new FileOutputStream(filename);
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		oos.writeObject(this);
-		oos.close();
+		Serializer.save(Serializer.Type.GZIP, this, filename);
 	}
 
-	static public Network readOnDisk(String filename) {
+	static public Network readFromDisk(String filename) {
 		File f = new File(filename);
 		if (!f.exists()) {
 			return null;
 		}
 		try {
-			FileInputStream fis = new FileInputStream(filename);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			Network network = (Network) ois.readObject();
-			ois.close();
+			Network network = Serializer.load(Serializer.Type.GZIP, Network.class, filename);
+
+			// Create synapse cache
+			SynapseFinder.getInstance().clearCache();
+
+			for (Layer l : network.getLayers()) {
+				for (Neuron n : l.getNeurons()) {
+					for (Synapse s : n.getOutputList()) {
+						SynapseFinder.getInstance().addNeuron(s, n, s.getRightNeuron());
+					}
+				}
+			}
+
 			return network;
 		} catch (IOException | ClassNotFoundException e) {
 			return null;
 		}
+
 	}
 
 	public void initWeights() {
@@ -136,8 +148,7 @@ public class Network implements Serializable {
 
 			// update outputs
 			for (Pair<Neuron, Double> p : neuronsToUpdate) {
-				Log.debug("Updating " + p.getValue0().getName() + " current output=" +
-						p.getValue0().getOutput());
+				Log.debug("Updating " + p.getValue0().getName() + " current output=" + p.getValue0().getOutput());
 				p.getValue0().setOutput(Calculus.sigmoid(p.getValue1()));
 				Log.debug(" to " + p.getValue0().getOutput());
 			}
@@ -167,7 +178,6 @@ public class Network implements Serializable {
 
 		if (clearSynapsesCache == true)
 			SynapseFinder.getInstance().clearCache();
-		;
 
 		for (Layer l : networkCopy.getLayers()) {
 			for (Neuron n : l.getNeurons()) {
@@ -251,9 +261,15 @@ public class Network implements Serializable {
 		SynapseFinder.getInstance().commitWeights();
 	}
 
+	/**
+	 * Train the network
+	 * 
+	 * @param epochs        self describing
+	 * @param tresholdError stop when error under this threshold, use a negative to
+	 *                      value to ignore
+	 * @return
+	 */
 	public int train(int epochs, double tresholdError) {
-		// int counter = 0;
-		// int modCounter = 500;
 		double meanEpochError = 0;
 		for (int i = 0; i < epochs; i++) {
 			meanEpochError = 0;
@@ -261,21 +277,19 @@ public class Network implements Serializable {
 			for (int j = 0; j < inputs.length; j++) {
 				for (int k = 0; k < inputs[j].length; k++)
 					getLayers().get(0).getNeurons().get(k).setOutput(inputs[j][k]);
-				for (int k = 0; k < exprectedOutputs[j].length; k++)
-					getLayers().get(getLayers().size() - 1).getNeurons().get(k).setExpected(exprectedOutputs[j][k]);
+				for (int k = 0; k < expectedOutputs[j].length; k++)
+					getLayers().get(getLayers().size() - 1).getNeurons().get(k).setExpected(expectedOutputs[j][k]);
 
 				// backpropagation
 				forward(); // update neurons output
 				totalError = totalError();
-				// String formatedError = String.format("%.10f", totalError);
-				// if (counter % modCounter == 0)
-				// Log.info("Epoch " + i + " Input set " + j + " Total error=" + formatedError);
-				// counter++;
-				// if (totalError < tresholdError) {
-				// Log.debug("Threshold stop at epoch " + i);
-				// return i;
-				// }
+				if (tresholdError > 0 && totalError < tresholdError) {
+					Log.debug("Threshold stop at epoch " + i);
+					return i;
+				}
 				backward(); // update synapse weights regarding error
+				
+				Log.info("  Epoch[" + i + "] Set[" + j + "] -> " +  String.format("%.10f", totalError));
 
 				meanEpochError += totalError;
 
@@ -288,10 +302,13 @@ public class Network implements Serializable {
 	}
 
 	static void displayResult(double[] inputs, double[] outputs) {
-		// for (int i = 0; i < inputs.length; i++) {
-		// System.out.print("[" + inputs[i] + "]");
-		// }
-		System.out.print(" -> ");
+		if (inputs != null) {
+			for (int i = 0; i < inputs.length; i++) {
+				String formatedError = String.format("%.3f", inputs[i]);
+				System.out.print("[" + formatedError + "]");
+			}
+			System.out.print(" -> ");
+		}
 		for (int i = 0; i < outputs.length; i++) {
 			String formatedError = String.format("%.3f", outputs[i]);
 			System.out.print("[" + formatedError + "]");
@@ -315,12 +332,12 @@ public class Network implements Serializable {
 		this.inputs = inputs;
 	}
 
-	public double[][] getExprectedOutputs() {
-		return exprectedOutputs;
+	public double[][] getExpectedOutputs() {
+		return expectedOutputs;
 	}
 
 	public void setExpectedOutputs(double[][] exprectedOutput) {
-		this.exprectedOutputs = exprectedOutput;
+		this.expectedOutputs = exprectedOutput;
 	}
 
 	public double getTotalError() {
