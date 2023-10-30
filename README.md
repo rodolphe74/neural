@@ -3,7 +3,6 @@
 <img src="homer.jpg" height="300">
 
 My multi-layer perceptron back propagation implementation.
-
 [(source)](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)
 
 # xor sample
