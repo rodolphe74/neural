@@ -31,6 +31,8 @@ network.addLayer(l2);
 network.xavierInitWeights();
 
 // Define sets
+double[][] inputs = { { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 } };
+double[][] outputs = { { 0 }, { 1 }, { 1 }, { 0 } };
 network.setInputs(inputs);
 network.setExpectedOutputs(outputs);
 
