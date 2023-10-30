@@ -79,5 +79,5 @@ Network.displayResult(inputTest, result);
 [1,000][1,000] -> [0,099]
 ```
 
-# Tested on MNIST dataset
+# Tested on [MNIST](http://yann.lecun.com/exdb/mnist/) dataset
 ...
