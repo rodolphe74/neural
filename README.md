@@ -80,3 +80,4 @@ Network.displayResult(inputTest, result);
 ```
 
 # Tested on MNIST dataset
+...
