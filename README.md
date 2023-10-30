@@ -43,7 +43,7 @@ int epochs = network.train(20000, 0.000000005);
 long et = System.currentTimeMillis();
 Log.info("epochs:" + epochs + " in " + (et - st));
 ```
-## prediction
+## predictions
 ```java
 // tests
 Network trainedNetwork = Network.copy(network, true);
