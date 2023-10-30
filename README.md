@@ -7,6 +7,7 @@ My multi-layer perceptron back propagation implementation
 # xor sample
 <img src="xor.png" width="400" >
 ## define network and train
+
 ```java
 // Defining a XOR network
 network = new Network();
