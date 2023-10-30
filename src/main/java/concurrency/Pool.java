@@ -32,7 +32,7 @@ public class Pool {
         Iterator<Task> i = tasks.iterator();
         CountDownLatch countDownLatch = new CountDownLatch(tasks.size());
         monitor.setCountDownLatch(countDownLatch);
-        System.out.println(monitor.getCountDownLatch().getCount());
+//        System.out.println(monitor.getCountDownLatch().getCount());
         while (i.hasNext()) {
             Runnable r = i.next();
             Thread t = new Thread(r);
@@ -44,14 +44,14 @@ public class Pool {
             // System.out.println("Tasks done");
         }
 
-        System.out.println("-->" + monitor.getCountDownLatch().getCount());
+//        System.out.println("-->" + monitor.getCountDownLatch().getCount());
         try {
             monitor.getCountDownLatch().await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-         System.out.println("==>" + monitor.getCountDownLatch().getCount());
+//         System.out.println("==>" + monitor.getCountDownLatch().getCount());
     }
 
     public Monitor getMonitor() {

@@ -310,7 +310,7 @@ public class Network implements Serializable {
 				}
 				backward(); // update synapse weights regarding error
 				
-				Log.info("  Epoch[" + i + "] Set[" + j + "] -> " +  String.format("%.10f", totalError));
+//				Log.info("  Epoch[" + i + "] Set[" + j + "] -> " +  String.format("%.10f", totalError));
 
 				meanEpochError += totalError;
 

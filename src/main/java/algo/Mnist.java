@@ -151,5 +151,6 @@ public class Mnist {
 			network.writeOnDisk("mnist.neu");
 		}
 
+		Log.info("Network error -> " + network.getTotalError());
 	}
 }

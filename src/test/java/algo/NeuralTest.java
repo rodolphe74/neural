@@ -202,7 +202,7 @@ public class NeuralTest extends TestCase {
 	public void testMnistNetwork() throws URISyntaxException, IOException {
 		// load trained network
 		Log.set(Log.LEVEL_INFO);
-		URL url = Ocr.class.getClassLoader().getResource("mnist2ep.neu");
+		URL url = Ocr.class.getClassLoader().getResource("mnist4ep.neu");
 		String mainPath = Paths.get(url.toURI()).toString();
 		Network network = Network.readFromDisk(mainPath);
 
@@ -253,6 +253,6 @@ public class NeuralTest extends TestCase {
 		Log.info("Accuracy:" + accuracy + "/" + iterTests);
 		Log.info("Random:" + randomCount + "/" + iterTests);
 
-		assertTrue(accuracy == 9311);
+		assertTrue(accuracy == 9392);
 	}
 }
