@@ -78,3 +78,5 @@ Network.displayResult(inputTest, result);
 [1,000][0,000] -> [0,895]
 [1,000][1,000] -> [0,099]
 ```
+
+# Tested on MNIST dataset
