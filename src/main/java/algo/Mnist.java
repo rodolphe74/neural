@@ -10,13 +10,12 @@ import com.esotericsoftware.minlog.Log;
 import mnist.MnistDataReader;
 import mnist.MnistMatrix;
 
-public class OcrMnist {
+public class Mnist {
 
 	final static int WIDTH = 28;
 	final static int HEIGHT = 28;
 	final static int SYMBOL_SIZE = WIDTH * HEIGHT;
 	final static double THRESHOLD = 0.6;
-	// final static char[] gradient = { ' ', '.', '~', '#', '@' };
 	final static char[] gradient = { ' ', '.', 'o', 'O', '0' };
 	static String[] matchSymbol;
 
@@ -79,7 +78,7 @@ public class OcrMnist {
 		network = Network.readFromDisk("mnist.neu");
 
 		// where the data set is
-		URL url = OcrMnist.class.getClassLoader().getResource("mnist");
+		URL url = Mnist.class.getClassLoader().getResource("mnist");
 		String mainPath = Paths.get(url.toURI()).toString();
 
 		if (network == null) {

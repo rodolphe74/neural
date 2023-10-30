@@ -11,6 +11,8 @@ import org.javatuples.Pair;
 
 import com.esotericsoftware.minlog.Log;
 
+import concurrency.Pool;
+import concurrency.Task;
 import serialize.Serializer;
 
 public class Network implements Serializable {
@@ -262,10 +264,29 @@ public class Network implements Serializable {
 	}
 
 	/**
+	 * Threaded version
+	 */
+	public void backwardT() {
+		backwardOutputLayer();
+		Pool pool = new Pool(4);
+		for (int i = 1; i < layers.size() - 1; i++) {
+			Task t = new Task(pool, i) {
+				@Override
+				public void whatToDo(Object parameter) {
+					backwardLayers((int) parameter);		
+				}
+			};
+			pool.addTask(t);
+		}
+		pool.doTasks();
+		SynapseFinder.getInstance().commitWeights();
+	}
+
+	/**
 	 * Train the network
 	 * 
 	 * @param epochs        self describing
-	 * @param tresholdError stop when error under this threshold, use a negative to
+	 * @param tresholdError stop when error under this threshold, use a negative
 	 *                      value to ignore
 	 * @return
 	 */
@@ -300,6 +321,7 @@ public class Network implements Serializable {
 		}
 		return epochs;
 	}
+
 
 	static void displayResult(double[] inputs, double[] outputs) {
 		if (inputs != null) {

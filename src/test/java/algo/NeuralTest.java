@@ -199,10 +199,10 @@ public class NeuralTest extends TestCase {
 //		Log.info("Random:" + randomCount + "/" + filesList.size());
 //	}
 
-	public void testOcrMnistNetwork() throws URISyntaxException, IOException {
+	public void testMnistNetwork() throws URISyntaxException, IOException {
 		// load trained network
 		Log.set(Log.LEVEL_INFO);
-		URL url = Ocr.class.getClassLoader().getResource("mnist.neu");
+		URL url = Ocr.class.getClassLoader().getResource("mnist2ep.neu");
 		String mainPath = Paths.get(url.toURI()).toString();
 		Network network = Network.readFromDisk(mainPath);
 
@@ -212,8 +212,8 @@ public class NeuralTest extends TestCase {
 		MnistMatrix[] mnistMatrix = new MnistDataReader().readData(mainPath + "/t10k-images.idx3-ubyte",
 				mainPath + "/t10k-labels.idx1-ubyte");
 
-		OcrMnist.debugSymbol(mnistMatrix[0]);
-		OcrMnist.debugSymbol(mnistMatrix[mnistMatrix.length - 1]);
+		Mnist.debugSymbol(mnistMatrix[0]);
+		Mnist.debugSymbol(mnistMatrix[mnistMatrix.length - 1]);
 
 		// keep a copy of trained network
 		// since predictions update weights
@@ -226,7 +226,7 @@ public class NeuralTest extends TestCase {
 		final int iterTests = mnistMatrix.length;
 
 		for (MnistMatrix matrix : mnistMatrix) {
-			double[] input = OcrMnist.getDoubleValues(matrix);
+			double[] input = Mnist.getDoubleValues(matrix);
 
 			network = trainedNetwork;
 			double result[] = Network.predict(network, input);
@@ -235,7 +235,7 @@ public class NeuralTest extends TestCase {
 //			OcrMnist.debugOutput(result);
 //			Log.info(matrix.getLabel() + " - Max output neuron index:" + OcrMnist.getMaxStimulatedNeuron(result));
 
-			if (matrix.getLabel() == OcrMnist.getMaxStimulatedNeuron(result)) {
+			if (matrix.getLabel() == Mnist.getMaxStimulatedNeuron(result)) {
 				accuracy++;
 			}
 
@@ -252,5 +252,7 @@ public class NeuralTest extends TestCase {
 
 		Log.info("Accuracy:" + accuracy + "/" + iterTests);
 		Log.info("Random:" + randomCount + "/" + iterTests);
+
+		assertTrue(accuracy == 9311);
 	}
 }
