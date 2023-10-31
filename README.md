@@ -117,5 +117,5 @@ The network is defined in [Mnist.java](https://github.com/rodolphe74/neural/blob
 Training this network on 60000 symbols on 2 epochs takes approximatively 1 hour.
 
 [Results](https://github.com/rodolphe74/neural/blob/main/src/test/java/algo/NeuralTest.java#L202) :
-- after 2 epochs : 9311/10000 good digits recognition.
-- after 4 epochs : 9392/10000 good digits recognition.
+- after 2 epochs : 9311/10000 good digits recognitions.
+- after 4 epochs : 9392/10000 good digits recognitions.
