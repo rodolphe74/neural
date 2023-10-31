@@ -108,9 +108,14 @@ The MNIST database is a database of handwritten digits. It is composed of 2 sets
 
 </h6>
 
-The network is defined in [Mnist.java](https://github.com/rodolphe74/neural/blob/main/src/main/java/algo/Mnist.java):
+The network is defined in [Mnist.java](https://github.com/rodolphe74/neural/blob/main/src/main/java/algo/Mnist.java) :
 - 1st input layer : 28x28 input neurons (784)
 - 2d hidden layer : 128 neurons
 - 3rd hidden layer : 64 neurons
 - 4th output layer : 10 neurons
 
+Training this network on 60000 symbols on 2 epochs takes approximatively 1 hour.
+
+[Results](https://github.com/rodolphe74/neural/blob/main/src/test/java/algo/NeuralTest.java#L202) :
+- after 2 epochs : 9311/10000 good digits recognition.
+- after 4 epochs : 9392/10000 good digits recognition.
