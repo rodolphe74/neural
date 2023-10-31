@@ -1,14 +1,14 @@
-# neural
+# Neural
 
 <img src="homer.jpg" height="300">
 
 My multi-layer perceptron back propagation implementation.
 [(source)](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)
 
-# xor sample
+# Xor sample
 <img src="xor.png" width="400" >
 
-## define network and train
+## Define network and train
 
 ```java
 // Defining a XOR network
@@ -44,7 +44,7 @@ int epochs = network.train(20000, 0.000000005);
 long et = System.currentTimeMillis();
 Log.info("epochs:" + epochs + " in " + (et - st));
 ```
-## predictions
+## Predictions
 ```java
 // tests
 Network trainedNetwork = Network.copy(network, true);
@@ -71,7 +71,7 @@ result = Network.predict(network, inputTest);
 Network.displayResult(inputTest, result);
 ```
 
-## results
+## Results
 ```
 [0,000][0,000] -> [0,153]
 [0,000][1,000] -> [0,887]
