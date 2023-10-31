@@ -84,26 +84,26 @@ The MNIST database is a database of handwritten digits. It is composed of 2 sets
 <h6>
 
 ```
-                  .OO.
-                .OOOOo
-              .OOOOO.
-            .OOOOOO.
-          oOOOOOOO
-            oOOOO
-           .OOOO
-          .OOOO.
-         .OOOOo
-        .OOOO
-       .OOOO.
-       .OOOO      oOOOO
-       OOOo.    ooOOOOOo
-      oOOO   oOOOOOOOOOO
-      OOOO oOOOOOOOOOOOo
-      OOOO.OOOo     oOO
-      OOOOOOOO.....OOOo
-      .OOOOOOOOOOOOOOo
-       oOOOOOOOOOOOo
-         oOOOOOooo.
+      .ooo                     .OO.
+      OOOOOOOOOOOOOOo        .OOOOo
+      ....oOOOOOOOOOOo      .OOOOO.
+            . ...  OO.    .OOOOOO.
+                  .OO    oOOOOOOO
+                  O0.       oOOOO
+                 oOO       .OOOO
+                 OO       .OOOO.
+                oOo      .OOOOo
+                OO      .OOOO
+               .Oo     .OOOO.
+              .OO      .OOOO      oOOOO
+              OOo      OOOo.    ooOOOOOo
+             OOO      oOOO   oOOOOOOOOOO
+             OO.      OOOO oOOOOOOOOOOOo
+            OO.       OOOO.OOOo     oOO
+           oOO        OOOOOOOO.....OOOo
+           OOO        .OOOOOOOOOOOOOOo
+          .OOO         oOOOOOOOOOOOo
+          .OO            oOOOOOooo.
 ```
 
 </h6>
