@@ -82,6 +82,7 @@ Network.displayResult(inputTest, result);
 # Tested on [MNIST](http://yann.lecun.com/exdb/mnist/) dataset
 The MNIST database is a database of handwritten digits. It is composed of 2 sets, 60000 symbols for learning and 10000 symbols for testing.
 <h6>
+
 ```
                   .OO.
                 .OOOOo
@@ -104,4 +105,5 @@ The MNIST database is a database of handwritten digits. It is composed of 2 sets
        oOOOOOOOOOOOo
          oOOOOOooo.
 ```
+
 </h6>
